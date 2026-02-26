@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>J&F Store</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --rose:#E8927C; --rose-light:#f2b5a4; --rose-pale:#fce8e3;
+      --gold:#C9A84C; --gold-light:#e2c06a;
+      --cream:#fdf8f5; --cream-dark:#f5ede8;
+      --brown:#5a3e36; --mid:#a08070; --white:#ffffff;
+      --green:#25D366; --red:#e05c5c; --green2:#5caa7f;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{background:var(--cream);color:var(--brown);font-family:'Nunito',sans-serif;font-weight:300;}
+
+    /* ═══════════════════════════════
+       CURSOR
+    ═══════════════════════════════ */
+    .cursor{width:8px;height:8px;background:var(--rose);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transition:transform .1s;}
+    .cursor-ring{width:32px;height:32px;border:1.5px solid var(--gold);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transition:all .22s ease;opacity:.7;}
+    body.admin-open .cursor, body.admin-open .cursor-ring,
+    body.login-open .cursor, body.login-open .cursor-ring { display:none; }
+
+    /* ═══════════════════════════════
+       NAV
+    ═══════════════════════════════ */
+    nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:1.4rem 4rem;background:rgba(253,248,245,.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(201,168,76,.2);}
+    .nav-logo{display:flex;align-items:center;gap:.7rem;text-decoration:none;}
+    .nav-logo-img{width:46px;height:46px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold);}
+    .nav-logo-text{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;color:var(--rose);letter-spacing:.08em;}
+    .nav-logo-text span{color:var(--gold);}
+    .nav-links{display:flex;gap:2.5rem;list-style:none;}
+    .nav-links a{text-decoration:none;color:var(--brown);font-size:.8rem;letter-spacing:.18em;text-transform:uppercase;opacity:.6;transition:opacity .2s,color .2s;}
+    .nav-links a:hover{opacity:1;color:var(--rose);}
+    .nav-cta{font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;padding:.6rem 1.6rem;background:var(--green);color:var(--white);text-decoration:none;border-radius:50px;font-weight:500;display:flex;align-items:center;gap:.4rem;transition:all .3s;}
+    .nav-cta:hover{background:#1ebe5d;transform:translateY(-1px);}
+
+    /* ═══════════════════════════════
+       HERO
+    ═══════════════════════════════ */
+    #accueil{min-height:100vh;display:flex;align-items:center;padding:0 4rem;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--cream) 0%,var(--cream-dark) 100%);}
+    .hero-blob{position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(232,146,124,.12) 0%,transparent 70%);right:-100px;top:50%;transform:translateY(-50%);border-radius:50%;}
+    .hero-blob2{position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(201,168,76,.08) 0%,transparent 70%);left:-80px;bottom:-80px;border-radius:50%;}
+    .hero-dots{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(201,168,76,.15) 1px,transparent 1px);background-size:40px 40px;opacity:.5;}
+    .hero-content{position:relative;z-index:1;max-width:600px;}
+    .hero-tag{display:inline-flex;align-items:center;gap:.5rem;font-size:.75rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);background:rgba(201,168,76,.1);padding:.4rem 1rem;border-radius:50px;border:1px solid rgba(201,168,76,.25);margin-bottom:2rem;opacity:0;animation:fadeUp .7s .2s forwards;}
+    .hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(3rem,7vw,6rem);font-weight:300;line-height:1.05;color:var(--brown);margin-bottom:1.5rem;opacity:0;animation:fadeUp .7s .4s forwards;}
+    .hero-title em{font-style:italic;color:var(--rose);}
+    .hero-title strong{font-weight:600;color:var(--gold);}
+    .hero-desc{font-size:1rem;line-height:1.85;color:var(--mid);margin-bottom:2.5rem;max-width:460px;opacity:0;animation:fadeUp .7s .6s forwards;}
+    .hero-btns{display:flex;gap:1rem;opacity:0;animation:fadeUp .7s .8s forwards;flex-wrap:wrap;}
+    .btn-rose{padding:.9rem 2.2rem;background:var(--rose);color:var(--white);text-decoration:none;font-size:.8rem;letter-spacing:.15em;text-transform:uppercase;border-radius:50px;font-weight:500;transition:all .3s;box-shadow:0 8px 24px rgba(232,146,124,.35);}
+    .btn-rose:hover{background:var(--rose-light);transform:translateY(-2px);}
+    .btn-wa{padding:.9rem 2.2rem;background:var(--green);color:var(--white);text-decoration:none;font-size:.8rem;letter-spacing:.15em;text-transform:uppercase;border-radius:50px;font-weight:500;transition:all .3s;display:inline-flex;align-items:center;gap:.5rem;}
+    .btn-wa:hover{background:#1ebe5d;transform:translateY(-2px);}
+    .hero-visual{position:absolute;right:4rem;top:50%;transform:translateY(-50%);opacity:0;animation:fadeIn 1s .6s forwards;}
+    .hero-card-main{width:320px;height:420px;background:linear-gradient(160deg,var(--white) 0%,var(--rose-pale) 100%);border-radius:24px;border:1.5px solid rgba(232,146,124,.25);display:flex;align-items:center;justify-content:center;font-size:6rem;box-shadow:0 30px 60px rgba(232,146,124,.15);position:relative;}
+    .hero-card-badge{position:absolute;top:1.2rem;right:1.2rem;background:var(--gold);color:var(--white);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;padding:.35rem .8rem;border-radius:50px;font-weight:500;}
+    .hero-card-info{position:absolute;bottom:0;left:0;right:0;padding:1.5rem;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);border-radius:0 0 24px 24px;border-top:1px solid rgba(232,146,124,.15);}
+    .hero-card-name{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--brown);}
+    .hero-card-price{color:var(--rose);font-size:1rem;font-weight:500;margin-top:.2rem;}
+    .hero-mini{position:absolute;top:2rem;left:-4rem;background:white;border-radius:16px;padding:1rem 1.2rem;display:flex;align-items:center;gap:.8rem;box-shadow:0 10px 30px rgba(90,62,54,.12);border:1px solid rgba(201,168,76,.2);white-space:nowrap;animation:float 3s ease-in-out infinite;}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+    /* ═══════════════════════════════
+       SECTIONS COMMON
+    ═══════════════════════════════ */
+    .section-header{text-align:center;margin-bottom:3.5rem;}
+    .section-tag{display:inline-flex;align-items:center;gap:.4rem;font-size:.7rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:.8rem;}
+    .section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3.2rem);font-weight:300;color:var(--brown);}
+    .section-title em{font-style:italic;color:var(--rose);}
+    .section-line{width:50px;height:2px;background:linear-gradient(90deg,var(--rose),var(--gold));margin:1.2rem auto 0;border-radius:2px;}
+
+    /* ═══════════════════════════════
+       CATALOGUE
+    ═══════════════════════════════ */
+    #catalogue{padding:7rem 4rem;background:var(--white);}
+    .filter-bar{display:flex;gap:.6rem;justify-content:center;margin-bottom:3rem;flex-wrap:wrap;}
+    .filter-btn{padding:.5rem 1.4rem;border:1.5px solid rgba(90,62,54,.15);background:transparent;color:var(--mid);font-family:'Nunito',sans-serif;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border-radius:50px;transition:all .3s;}
+    .filter-btn.active,.filter-btn:hover{border-color:var(--rose);color:var(--rose);background:rgba(232,146,124,.07);}
+    .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.8rem;}
+    .product-card{background:var(--cream);border-radius:20px;border:1px solid rgba(232,146,124,.12);overflow:hidden;transition:transform .3s,box-shadow .3s;}
+    .product-card:hover{transform:translateY(-6px);box-shadow:0 20px 50px rgba(232,146,124,.18);}
+    .product-img{height:260px;background:linear-gradient(135deg,var(--rose-pale),var(--cream-dark));display:flex;align-items:center;justify-content:center;font-size:4.5rem;position:relative;overflow:hidden;}
+    .product-img img{width:100%;height:100%;object-fit:cover;}
+    .product-badge{position:absolute;top:1rem;left:1rem;background:var(--rose);color:white;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;padding:.25rem .7rem;border-radius:50px;font-weight:500;z-index:1;}
+    .product-info{padding:1.3rem;}
+    .product-cat{font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:.3rem;}
+    .product-name{font-family:'Cormorant Garamond',serif;font-size:1.25rem;color:var(--brown);margin-bottom:.3rem;}
+    .product-desc{font-size:.8rem;color:var(--mid);margin-bottom:1rem;}
+    .product-footer{display:flex;align-items:center;justify-content:space-between;}
+    .product-price{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--rose);font-weight:600;}
+    .product-btn{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;padding:.5rem 1.1rem;border:none;color:white;background:var(--green);cursor:pointer;border-radius:50px;font-family:'Nunito',sans-serif;transition:all .3s;display:inline-flex;align-items:center;gap:.3rem;text-decoration:none;}
+    .product-btn:hover{background:#1ebe5d;transform:translateY(-1px);}
+
+    /* ═══════════════════════════════
+       À PROPOS
+    ═══════════════════════════════ */
+    #apropos{padding:7rem 4rem;background:linear-gradient(135deg,var(--cream-dark) 0%,var(--cream) 100%);}
+    .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;max-width:1100px;margin:0 auto;}
+    .about-visual{height:480px;border-radius:32px;background:linear-gradient(160deg,var(--white) 0%,var(--rose-pale) 100%);border:1.5px solid rgba(232,146,124,.25);display:flex;align-items:center;justify-content:center;font-size:8rem;position:relative;box-shadow:0 30px 60px rgba(232,146,124,.12);}
+    .about-visual::before{content:'';position:absolute;top:-1rem;right:-1rem;width:100%;height:100%;border:1.5px solid rgba(201,168,76,.2);border-radius:32px;z-index:-1;}
+    .about-body{margin-top:2rem;font-size:.95rem;line-height:1.95;color:var(--mid);}
+    .about-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:2.5rem;}
+    .stat-box{background:var(--white);border-radius:16px;padding:1.2rem;text-align:center;border:1px solid rgba(232,146,124,.12);}
+    .stat-num{font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--rose);font-weight:600;}
+    .stat-label{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mid);margin-top:.2rem;}
+
+    /* ═══════════════════════════════
+       CONTACT
+    ═══════════════════════════════ */
+    #contact{padding:7rem 4rem;background:var(--white);}
+    .contact-wrapper{max-width:700px;margin:0 auto;text-align:center;}
+    .contact-info{display:flex;justify-content:center;gap:2.5rem;margin-top:3rem;flex-wrap:wrap;}
+    .contact-item{text-align:center;}
+    .contact-icon{width:52px;height:52px;border-radius:50%;background:var(--rose-pale);display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin:0 auto .6rem;border:1.5px solid rgba(232,146,124,.25);}
+    .contact-label{font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:.2rem;}
+    .contact-value{font-size:.88rem;color:var(--mid);}
+    .contact-value a{color:var(--mid);text-decoration:none;}
+    .contact-value a:hover{color:var(--rose);}
+
+    /* ═══════════════════════════════
+       FOOTER
+    ═══════════════════════════════ */
+    footer{padding:2.5rem 4rem;background:var(--cream-dark);border-top:1px solid rgba(201,168,76,.15);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+    .footer-logo{display:flex;align-items:center;gap:.6rem;}
+    .footer-logo-img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid var(--gold);}
+    .footer-logo-text{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--rose);}
+    .footer-copy{font-size:.75rem;color:var(--mid);}
+    .footer-right{display:flex;align-items:center;gap:1.2rem;}
+    .footer-socials{display:flex;gap:.8rem;}
+    .footer-socials a{width:36px;height:36px;border-radius:50%;background:white;border:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;font-size:.9rem;text-decoration:none;transition:all .2s;}
+    .footer-socials a:hover{background:var(--rose-pale);transform:translateY(-2px);}
+    /* ← Le bouton Admin discret */
+    .admin-link{font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mid);opacity:.45;border:1px solid rgba(90,62,54,.15);padding:.4rem .9rem;border-radius:50px;cursor:pointer;background:transparent;font-family:'Nunito',sans-serif;transition:all .25s;}
+    .admin-link:hover{opacity:1;color:var(--brown);border-color:var(--gold);}
+
+    /* WhatsApp float */
+    .wa-float{position:fixed;bottom:2rem;right:2rem;width:58px;height:58px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.6rem;box-shadow:0 8px 24px rgba(37,211,102,.4);z-index:500;text-decoration:none;transition:all .3s;animation:waPulse 2.5s infinite;}
+    .wa-float:hover{transform:scale(1.1);}
+    @keyframes waPulse{0%,100%{box-shadow:0 8px 24px rgba(37,211,102,.4)}50%{box-shadow:0 8px 36px rgba(37,211,102,.7)}}
+
+    /* ═══════════════════════════════
+       LOGIN OVERLAY
+    ═══════════════════════════════ */
+    #loginOverlay{display:none;position:fixed;inset:0;background:rgba(90,62,54,.35);backdrop-filter:blur(6px);z-index:1000;align-items:center;justify-content:center;}
+    #loginOverlay.show{display:flex;}
+    .login-box{background:var(--white);border-radius:24px;padding:3rem 2.5rem;width:100%;max-width:400px;text-align:center;box-shadow:0 30px 60px rgba(232,146,124,.2);border:1.5px solid rgba(232,146,124,.2);position:relative;animation:popIn .3s ease;}
+    @keyframes popIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+    .login-close{position:absolute;top:1rem;right:1.2rem;background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--mid);line-height:1;}
+    .login-logo{font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--rose);font-weight:600;margin-bottom:.3rem;}
+    .login-logo span{color:var(--gold);}
+    .login-sub{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mid);margin-bottom:2rem;}
+    .login-box input{width:100%;padding:.9rem 1.2rem;background:var(--cream);border:1.5px solid rgba(232,146,124,.2);border-radius:12px;font-family:'Nunito',sans-serif;font-size:.95rem;color:var(--brown);outline:none;margin-bottom:1rem;transition:border-color .3s;}
+    .login-box input:focus{border-color:var(--rose);}
+    .login-btn{width:100%;padding:.9rem;background:var(--rose);color:white;border:none;border-radius:12px;font-family:'Nunito',sans-serif;font-size:.85rem;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:background .3s;font-weight:500;}
+    .login-btn:hover{background:var(--rose-light);}
+    .login-error{color:var(--red);font-size:.8rem;margin-top:.8rem;display:none;}
+
+    /* ═══════════════════════════════
+       ADMIN PANEL (full screen overlay)
+    ═══════════════════════════════ */
+    #adminPanel{display:none;position:fixed;inset:0;z-index:900;background:var(--cream);overflow:hidden;}
+    #adminPanel.show{display:flex;}
+
+    .adm-sidebar{width:260px;background:var(--white);border-right:1px solid rgba(232,146,124,.15);display:flex;flex-direction:column;flex-shrink:0;}
+    .adm-sidebar-logo{padding:1.8rem 1.5rem;border-bottom:1px solid rgba(232,146,124,.12);font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:var(--rose);}
+    .adm-sidebar-logo span{color:var(--gold);}
+    .adm-sidebar-logo small{display:block;font-family:'Nunito',sans-serif;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mid);font-weight:400;margin-top:.2rem;}
+    .adm-nav{flex:1;padding:1.5rem 1rem;overflow-y:auto;}
+    .adm-nav-item{display:flex;align-items:center;gap:.8rem;padding:.8rem 1rem;border-radius:12px;margin-bottom:.3rem;cursor:pointer;font-size:.88rem;color:var(--mid);transition:all .2s;}
+    .adm-nav-item:hover,.adm-nav-item.active{background:var(--rose-pale);color:var(--rose);}
+    .adm-nav-item .icon{font-size:1.1rem;width:24px;text-align:center;}
+    .adm-sidebar-footer{padding:1.2rem 1.5rem;border-top:1px solid rgba(232,146,124,.12);display:flex;flex-direction:column;gap:.6rem;}
+    .adm-back-btn{width:100%;padding:.7rem;border:1.5px solid rgba(232,146,124,.3);background:transparent;color:var(--rose);border-radius:10px;font-family:'Nunito',sans-serif;font-size:.78rem;cursor:pointer;transition:all .2s;letter-spacing:.1em;text-transform:uppercase;}
+    .adm-back-btn:hover{background:var(--rose-pale);}
+    .adm-logout-btn{width:100%;padding:.7rem;border:1.5px solid rgba(224,92,92,.2);background:transparent;color:var(--mid);border-radius:10px;font-family:'Nunito',sans-serif;font-size:.78rem;cursor:pointer;transition:all .2s;letter-spacing:.1em;text-transform:uppercase;}
+    .adm-logout-btn:hover{border-color:var(--red);color:var(--red);}
+
+    .adm-main{flex:1;overflow-y:auto;padding:2.5rem;}
+    .adm-top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;}
+    .adm-page-title{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:400;}
+    .adm-page-title em{font-style:italic;color:var(--rose);}
+
+    /* Stats */
+    .adm-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-bottom:2rem;}
+    .adm-stat{background:var(--white);border-radius:16px;padding:1.5rem;border:1px solid rgba(232,146,124,.1);}
+    .adm-stat-icon{font-size:1.8rem;margin-bottom:.7rem;}
+    .adm-stat-num{font-family:'Cormorant Garamond',serif;font-size:2.2rem;color:var(--rose);font-weight:600;}
+    .adm-stat-label{font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mid);margin-top:.2rem;}
+
+    /* Panels */
+    .adm-panel{display:none;}
+    .adm-panel.active{display:block;}
+
+    /* Cards */
+    .adm-card{background:var(--white);border-radius:20px;padding:2rem;border:1px solid rgba(232,146,124,.12);margin-bottom:1.5rem;}
+    .adm-card h3{font-family:'Cormorant Garamond',serif;font-size:1.4rem;margin-bottom:1.5rem;color:var(--brown);}
+
+    /* Form */
+    .adm-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    .adm-fg{display:flex;flex-direction:column;gap:.4rem;}
+    .adm-fg.full{grid-column:1/-1;}
+    .adm-fg label{font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);font-weight:500;}
+    .adm-fg input,.adm-fg select,.adm-fg textarea{padding:.8rem 1rem;background:var(--cream);border:1.5px solid rgba(232,146,124,.18);border-radius:10px;font-family:'Nunito',sans-serif;font-size:.9rem;color:var(--brown);outline:none;transition:border-color .3s;resize:none;}
+    .adm-fg input:focus,.adm-fg select:focus,.adm-fg textarea:focus{border-color:var(--rose);}
+
+    .img-drop{border:2px dashed rgba(232,146,124,.35);border-radius:14px;padding:2rem;text-align:center;cursor:pointer;transition:all .3s;background:var(--cream);position:relative;}
+    .img-drop:hover{border-color:var(--rose);background:var(--rose-pale);}
+    .img-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+    .img-drop-icon{font-size:2rem;margin-bottom:.5rem;}
+    .img-drop-text{font-size:.85rem;color:var(--mid);}
+    .img-drop-text strong{color:var(--rose);}
+    .img-preview-box{width:100%;height:160px;object-fit:cover;border-radius:10px;margin-top:1rem;display:none;border:1.5px solid rgba(232,146,124,.2);}
+
+    .adm-form-actions{display:flex;gap:1rem;margin-top:1.5rem;}
+    .btn-save{padding:.8rem 2rem;background:var(--rose);color:white;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-size:.82rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .3s;font-weight:500;}
+    .btn-save:hover{background:var(--rose-light);}
+    .btn-cancel{padding:.8rem 2rem;border:1.5px solid rgba(90,62,54,.15);background:transparent;color:var(--mid);border-radius:10px;font-family:'Nunito',sans-serif;font-size:.82rem;cursor:pointer;transition:all .3s;}
+    .btn-cancel:hover{border-color:var(--mid);}
+
+    /* Products table */
+    .adm-table{background:var(--white);border-radius:20px;border:1px solid rgba(232,146,124,.12);overflow:hidden;}
+    .adm-table-header{padding:1.2rem 1.5rem;border-bottom:1px solid rgba(232,146,124,.1);display:flex;align-items:center;justify-content:space-between;}
+    .adm-table-header h3{font-family:'Cormorant Garamond',serif;font-size:1.3rem;}
+    .btn-add{padding:.6rem 1.4rem;background:var(--rose);color:white;border:none;border-radius:50px;font-family:'Nunito',sans-serif;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .3s;font-weight:500;}
+    .btn-add:hover{background:var(--rose-light);}
+    .adm-row{display:grid;grid-template-columns:58px 1fr 110px 90px 130px;align-items:center;gap:1rem;padding:1rem 1.5rem;border-bottom:1px solid rgba(232,146,124,.07);transition:background .2s;}
+    .adm-row:hover{background:var(--rose-pale);}
+    .adm-row:last-child{border-bottom:none;}
+    .adm-row-thumb{width:50px;height:50px;border-radius:10px;overflow:hidden;background:var(--rose-pale);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;}
+    .adm-row-thumb img{width:100%;height:100%;object-fit:cover;}
+    .adm-row-name{font-weight:500;font-size:.9rem;}
+    .adm-row-cat{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-top:.2rem;}
+    .adm-row-price{color:var(--rose);font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;}
+    .adm-badge{display:inline-block;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;padding:.2rem .6rem;border-radius:50px;background:rgba(232,146,124,.15);color:var(--rose);}
+    .adm-row-actions{display:flex;gap:.5rem;}
+    .btn-edit{padding:.4rem .8rem;border:1.5px solid rgba(201,168,76,.3);color:var(--gold);background:transparent;border-radius:8px;font-size:.7rem;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .2s;}
+    .btn-edit:hover{background:var(--gold);color:white;}
+    .btn-del{padding:.4rem .8rem;border:1.5px solid rgba(224,92,92,.3);color:var(--red);background:transparent;border-radius:8px;font-size:.7rem;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .2s;}
+    .btn-del:hover{background:var(--red);color:white;}
+
+    /* Settings */
+    .adm-settings-row{display:flex;align-items:center;justify-content:space-between;padding:.9rem 0;border-bottom:1px solid rgba(232,146,124,.08);flex-wrap:wrap;gap:.5rem;}
+    .adm-settings-row:last-child{border-bottom:none;}
+    .adm-settings-label{font-size:.88rem;font-weight:500;}
+    .adm-settings-sub{font-size:.76rem;color:var(--mid);margin-top:.1rem;}
+    .adm-settings-input{padding:.6rem 1rem;background:var(--cream);border:1.5px solid rgba(232,146,124,.2);border-radius:8px;font-family:'Nunito',sans-serif;font-size:.88rem;color:var(--brown);outline:none;width:220px;transition:border-color .3s;}
+    .adm-settings-input:focus{border-color:var(--rose);}
+    .btn-save-s{padding:.6rem 1.4rem;background:var(--gold);color:white;border:none;border-radius:8px;font-family:'Nunito',sans-serif;font-size:.78rem;cursor:pointer;transition:background .3s;margin-top:1rem;font-weight:500;}
+    .btn-save-s:hover{background:var(--gold-light);}
+
+    /* Toast */
+    .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--brown);color:white;padding:.9rem 1.8rem;border-radius:12px;font-size:.85rem;opacity:0;transition:all .35s;z-index:9999;}
+    .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+    .toast.success{background:var(--green2);}
+    .toast.error{background:var(--red);}
+
+    /* ANIMS */
+    @keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease;}
+    .reveal.visible{opacity:1;transform:translateY(0);}
+
+    @media(max-width:960px){
+      nav{padding:1rem 2rem;} .nav-links{display:none;}
+      #accueil{padding:6rem 2rem 4rem;} .hero-visual{display:none;}
+      #catalogue,#apropos,#contact{padding:5rem 2rem;}
+      .about-grid{grid-template-columns:1fr;gap:2.5rem;} .about-visual{height:260px;}
+      footer{padding:2rem;justify-content:center;text-align:center;}
+      .adm-sidebar{width:200px;} .adm-main{padding:1.5rem;}
+      .adm-stats{grid-template-columns:1fr 1fr;}
+      .adm-form-grid{grid-template-columns:1fr;}
+      .adm-row{grid-template-columns:48px 1fr 80px;} .adm-row-price,.adm-row .adm-badge{display:none;}
+    }
+    @media(max-width:600px){
+      .adm-sidebar{display:none;} 
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- WhatsApp float -->
+  <a class="wa-float" id="waFloat" href="#" target="_blank">💬</a>
+
+  <!-- ══════════════════════════════
+       SITE PUBLIC
+  ══════════════════════════════ -->
+  <nav>
+    <a href="#accueil" class="nav-logo">
+      <img src="J_F_store_____20260225_175546.jpg" alt="J&F" class="nav-logo-img" onerror="this.style.display='none'"/>
+      <span class="nav-logo-text">J<span>&amp;</span>F Store</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#accueil">Accueil</a></li>
+      <li><a href="#catalogue">Catalogue</a></li>
+      <li><a href="#apropos">À Propos</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <a href="#" id="navWaBtn" class="nav-cta" target="_blank">💬 WhatsApp</a>
+  </nav>
+
+  <section id="accueil">
+    <div class="hero-blob"></div><div class="hero-blob2"></div><div class="hero-dots"></div>
+    <div class="hero-content">
+      <div class="hero-tag">🛍️ Mode &amp; Accessoires</div>
+      <h1 class="hero-title">Votre Style,<br><em>Votre</em><br><strong>Élégance</strong></h1>
+      <p class="hero-desc">J&F Store vous propose une collection soignée de vêtements et accessoires tendance pour sublimer votre quotidien.</p>
+      <div class="hero-btns">
+        <a href="#catalogue" class="btn-rose">Voir le Catalogue</a>
+        <a href="#" id="heroWaBtn" class="btn-wa" target="_blank">💬 Commander sur WhatsApp</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card-main">👗
+        <div class="hero-card-badge">Nouveau</div>
+        <div class="hero-card-info">
+          <div class="hero-card-name">Collection Printemps</div>
+          <div class="hero-card-price">À partir de 15 000 FCFA</div>
+        </div>
+      </div>
+      <div class="hero-mini">
+        <span style="font-size:1.4rem">⭐</span>
+        <div><div style="font-size:.7rem;color:var(--mid);letter-spacing:.1em;text-transform:uppercase">Avis clients</div><div style="font-size:.85rem;font-weight:500">500+ clients satisfaits</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="catalogue">
+    <div class="section-header reveal">
+      <p class="section-tag">✦ Notre Sélection</p>
+      <h2 class="section-title">Le <em>Catalogue</em></h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="filter-bar reveal">
+      <button class="filter-btn active" onclick="filterProducts(this,'tous')">Tous</button>
+      <button class="filter-btn" onclick="filterProducts(this,'habits')">Vêtements</button>
+      <button class="filter-btn" onclick="filterProducts(this,'accessoires')">Accessoires</button>
+    </div>
+    <div class="products-grid" id="productsGrid"></div>
+  </section>
+
+  <section id="apropos">
+    <div class="about-grid">
+      <div class="about-visual reveal">🛍️</div>
+      <div class="about-text">
+        <div class="section-header reveal" style="text-align:left">
+          <p class="section-tag">✦ Notre Histoire</p>
+          <h2 class="section-title">À <em>Propos</em></h2>
+          <div class="section-line" style="margin:1rem 0 0"></div>
+        </div>
+        <p class="about-body reveal">
+          J&F Store est né d'une passion pour la mode accessible et de qualité. Nous croyons que bien s'habiller ne devrait pas être un luxe — c'est pourquoi nous sélectionnons avec amour chaque pièce pour allier style, confort et accessibilité.<br><br>
+          Que ce soit pour le quotidien ou une occasion spéciale, notre boutique est l'endroit parfait pour trouver votre style unique.
+        </p>
+        <div class="about-stats reveal">
+          <div class="stat-box"><div class="stat-num">200+</div><div class="stat-label">Produits</div></div>
+          <div class="stat-box"><div class="stat-num">500+</div><div class="stat-label">Clients</div></div>
+          <div class="stat-box"><div class="stat-num">100%</div><div class="stat-label">Qualité</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="contact-wrapper">
+      <div class="section-header reveal">
+        <p class="section-tag">✦ Parlons-nous</p>
+        <h2 class="section-title">Nous <em>Contacter</em></h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="contact-info reveal">
+        <div class="contact-item">
+          <div class="contact-icon">📍</div>
+          <div class="contact-label">Adresse</div>
+          <div class="contact-value" id="cAddr">Votre ville, Pays</div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">📱</div>
+          <div class="contact-label">Téléphone</div>
+          <div class="contact-value" id="cPhone">+XX XXX XXX XXX</div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">💬</div>
+          <div class="contact-label">WhatsApp</div>
+          <div class="contact-value"><a id="cWa" href="#" target="_blank">Nous écrire</a></div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">✉️</div>
+          <div class="contact-label">Email</div>
+          <div class="contact-value" id="cEmail">contact@jfstore.com</div>
+        </div>
+      </div>
+      <div style="margin-top:3rem" class="reveal">
+        <a id="ctaWaBtn" href="#" target="_blank" class="btn-wa" style="display:inline-flex;justify-content:center;font-size:.9rem;padding:1.1rem 3rem;">
+          💬 Nous contacter sur WhatsApp
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-logo">
+      <img src="J_F_store_____20260225_175546.jpg" alt="J&F" class="footer-logo-img" onerror="this.style.display='none'"/>
+      <span class="footer-logo-text">J&amp;F Store</span>
+    </div>
+    <div class="footer-copy">© 2025 J&amp;F Store — Tous droits réservés</div>
+    <div class="footer-right">
+      <div class="footer-socials">
+        <a href="#" title="Instagram">📸</a>
+        <a href="#" title="Facebook">👤</a>
+        <a id="footerWa" href="#" target="_blank" title="WhatsApp">💬</a>
+      </div>
+      <!-- Bouton Admin discret -->
+      <button class="admin-link" onclick="openLogin()">⚙️ Espace Admin</button>
+    </div>
+  </footer>
+
+  <!-- ══════════════════════════════
+       LOGIN OVERLAY
+  ══════════════════════════════ -->
+  <div id="loginOverlay">
+    <div class="login-box">
+      <button class="login-close" onclick="closeLogin()">✕</button>
+      <div class="login-logo">J<span>&amp;</span>F Store</div>
+      <div class="login-sub">Espace Administrateur</div>
+      <input type="password" id="pwInput" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')doLogin()"/>
+      <button class="login-btn" onclick="doLogin()">Se connecter</button>
+      <div class="login-error" id="loginError">❌ Mot de passe incorrect</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       ADMIN PANEL
+  ══════════════════════════════ -->
+  <div id="adminPanel">
+    <div class="adm-sidebar">
+      <div class="adm-sidebar-logo">J<span>&amp;</span>F Store<small>Administration</small></div>
+      <nav class="adm-nav">
+        <div class="adm-nav-item active" onclick="admPanel('dashboard')"><span class="icon">📊</span> Tableau de bord</div>
+        <div class="adm-nav-item" onclick="admPanel('products')"><span class="icon">👗</span> Produits</div>
+        <div class="adm-nav-item" onclick="admPanel('add')"><span class="icon">➕</span> Ajouter un produit</div>
+        <div class="adm-nav-item" onclick="admPanel('settings')"><span class="icon">⚙️</span> Paramètres</div>
+      </nav>
+      <div class="adm-sidebar-footer">
+        <button class="adm-back-btn" onclick="closeAdmin()">← Retour au site</button>
+        <button class="adm-logout-btn" onclick="doLogout()">🚪 Déconnexion</button>
+      </div>
+    </div>
+    <div class="adm-main">
+      <div class="adm-top-bar">
+        <h1 class="adm-page-title" id="admTitle">Tableau de <em>Bord</em></h1>
+      </div>
+
+      <!-- Dashboard -->
+      <div class="adm-panel active" id="adm-dashboard">
+        <div class="adm-stats">
+          <div class="adm-stat"><div class="adm-stat-icon">👗</div><div class="adm-stat-num" id="stTotal">0</div><div class="adm-stat-label">Produits total</div></div>
+          <div class="adm-stat"><div class="adm-stat-icon">👔</div><div class="adm-stat-num" id="stHabits">0</div><div class="adm-stat-label">Vêtements</div></div>
+          <div class="adm-stat"><div class="adm-stat-icon">👜</div><div class="adm-stat-num" id="stAcc">0</div><div class="adm-stat-label">Accessoires</div></div>
+        </div>
+        <div class="adm-card">
+          <h3>🚀 Démarrage rapide</h3>
+          <p style="color:var(--mid);font-size:.9rem;line-height:1.9">
+            Bienvenue dans l'espace admin de <strong>J&F Store</strong> !<br>
+            • Cliquez sur <strong>Ajouter un produit</strong> pour ajouter un article avec une vraie photo.<br>
+            • Cliquez sur <strong>Produits</strong> pour gérer et modifier votre catalogue.<br>
+            • Dans <strong>Paramètres</strong>, entrez votre numéro WhatsApp pour activer les commandes.<br>
+            • Cliquez sur <strong>Retour au site</strong> pour voir le résultat en direct.
+          </p>
+        </div>
+      </div>
+
+      <!-- Products list -->
+      <div class="adm-panel" id="adm-products">
+        <div class="adm-table">
+          <div class="adm-table-header">
+            <h3>Tous les produits</h3>
+            <button class="btn-add" onclick="admPanel('add')">+ Ajouter</button>
+          </div>
+          <div id="admProductsList"></div>
+        </div>
+      </div>
+
+      <!-- Add / Edit -->
+      <div class="adm-panel" id="adm-add">
+        <div class="adm-card">
+          <h3 id="admFormTitle">Ajouter un produit</h3>
+          <input type="hidden" id="editId"/>
+          <div class="adm-form-grid">
+            <div class="adm-fg"><label>Nom du produit</label><input type="text" id="fName" placeholder="Ex: Robe Élégante"/></div>
+            <div class="adm-fg"><label>Prix</label><input type="text" id="fPrice" placeholder="Ex: 25 000 FCFA"/></div>
+            <div class="adm-fg"><label>Catégorie</label>
+              <select id="fCat"><option value="habits">Vêtement</option><option value="accessoires">Accessoire</option></select>
+            </div>
+            <div class="adm-fg"><label>Badge (optionnel)</label>
+              <select id="fBadge"><option value="">Aucun</option><option value="Nouveau">Nouveau</option><option value="Populaire">Populaire</option><option value="Premium">Premium</option><option value="Promo">Promo</option></select>
+            </div>
+            <div class="adm-fg full"><label>Description</label><textarea id="fDesc" rows="2" placeholder="Courte description..."></textarea></div>
+            <div class="adm-fg full">
+              <label>Photo du produit</label>
+              <div class="img-drop">
+                <input type="file" id="fImg" accept="image/*" onchange="previewImg(event)"/>
+                <div class="img-drop-icon">📸</div>
+                <div class="img-drop-text">Clique ou glisse une photo ici<br><strong>JPG, PNG, WEBP</strong> acceptés</div>
+                <img class="img-preview-box" id="imgPrev"/>
+              </div>
+            </div>
+          </div>
+          <div class="adm-form-actions">
+            <button class="btn-save" onclick="saveProduct()">💾 Enregistrer</button>
+            <button class="btn-cancel" onclick="cancelEdit()">Annuler</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div class="adm-panel" id="adm-settings">
+        <div class="adm-card">
+          <h3>⚙️ Paramètres du site</h3>
+          <div class="adm-settings-row">
+            <div><div class="adm-settings-label">Numéro WhatsApp</div><div class="adm-settings-sub">Les clients vous contacteront via ce numéro</div></div>
+            <input class="adm-settings-input" id="sWA" placeholder="+225 XX XX XX XX" type="tel"/>
+          </div>
+          <div class="adm-settings-row">
+            <div><div class="adm-settings-label">Email de contact</div><div class="adm-settings-sub">Affiché dans la section contact</div></div>
+            <input class="adm-settings-input" id="sEmail" placeholder="contact@jfstore.com" type="email"/>
+          </div>
+          <div class="adm-settings-row">
+            <div><div class="adm-settings-label">Adresse</div><div class="adm-settings-sub">Votre localisation</div></div>
+            <input class="adm-settings-input" id="sAddr" placeholder="Votre ville, Pays"/>
+          </div>
+          <div class="adm-settings-row">
+            <div><div class="adm-settings-label">Téléphone</div><div class="adm-settings-sub">Numéro affiché sur le site</div></div>
+            <input class="adm-settings-input" id="sPhone" placeholder="+XX XXX XXX XXX" type="tel"/>
+          </div>
+          <button class="btn-save-s" onclick="saveSettings()">✅ Sauvegarder</button>
+        </div>
+        <div class="adm-card">
+          <h3>🔐 Changer le mot de passe</h3>
+          <div class="adm-settings-row">
+            <div><div class="adm-settings-label">Nouveau mot de passe</div></div>
+            <input class="adm-settings-input" id="sPw" type="password" placeholder="Nouveau mot de passe"/>
+          </div>
+          <button class="btn-save-s" onclick="changePw()">🔒 Changer</button>
+        </div>
+      </div>
+
+    </div><!-- /adm-main -->
+  </div><!-- /adminPanel -->
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ══════════════════════════════
+       JAVASCRIPT
+  ══════════════════════════════ -->
+  <script>
+  const DEFAULT_PW = 'jfstore2025';
+
+  /* ── CURSOR ── */
+  const cur=document.getElementById('cursor'),ring=document.getElementById('cursorRing');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx-4+'px';cur.style.top=my-4+'px';});
+  (function a(){rx+=(mx-rx-16)*.12;ry+=(my-ry-16)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(a);})();
+
+  /* ── STORAGE HELPERS ── */
+  const getProducts = () => JSON.parse(localStorage.getItem('jf_products')||'[]');
+  const saveProducts = a => localStorage.setItem('jf_products',JSON.stringify(a));
+  const getSettings  = () => JSON.parse(localStorage.getItem('jf_settings')||'{}');
+
+  /* ── DEFAULT PRODUCTS ── */
+  if(!localStorage.getItem('jf_products')){
+    saveProducts([
+      {id:1,name:'Veste Élégante',cat:'habits',desc:'Coupe moderne, tissu premium',price:'45 000 FCFA',badge:'Nouveau',img:''},
+      {id:2,name:'Robe Chic',cat:'habits',desc:'Parfaite pour toutes occasions',price:'38 000 FCFA',badge:'',img:''},
+      {id:3,name:'Sac à Main',cat:'accessoires',desc:'Cuir synthétique haut de gamme',price:'22 000 FCFA',badge:'Populaire',img:''},
+      {id:4,name:'Chemise Classic',cat:'habits',desc:'100% coton, plusieurs coloris',price:'18 000 FCFA',badge:'',img:''},
+      {id:5,name:'Lunettes de Soleil',cat:'accessoires',desc:'Protection UV400, style moderne',price:'15 000 FCFA',badge:'Nouveau',img:''},
+      {id:6,name:'Pantalon Slim',cat:'habits',desc:'Coupe slim, très confortable',price:'28 000 FCFA',badge:'',img:''},
+      {id:7,name:'Montre Dorée',cat:'accessoires',desc:'Acier inoxydable, cadran doré',price:'55 000 FCFA',badge:'Premium',img:''},
+      {id:8,name:'Sneakers Urban',cat:'habits',desc:'Style streetwear tendance',price:'42 000 FCFA',badge:'',img:''},
+    ]);
+  }
+
+  /* ── WHATSAPP LINKS ── */
+  function waLink(msg){
+    const n=(getSettings().whatsapp||'').replace(/\D/g,'');
+    return n?`https://wa.me/${n}?text=${encodeURIComponent(msg)}`:'#';
+  }
+  function applySettings(){
+    const s=getSettings();
+    const def='Bonjour J&F Store, je suis intéressé(e) par vos produits 👋';
+    ['waFloat','navWaBtn','heroWaBtn','ctaWaBtn','footerWa'].forEach(id=>{const el=document.getElementById(id);if(el)el.href=waLink(def);});
+    const cwa=document.getElementById('cWa');if(cwa)cwa.href=waLink(def);
+    if(s.address) document.getElementById('cAddr').textContent=s.address;
+    if(s.phone)   document.getElementById('cPhone').textContent=s.phone;
+    if(s.email)   document.getElementById('cEmail').textContent=s.email;
+  }
+
+  /* ── RENDER PRODUCTS (site) ── */
+  const EMOJI={habits:'👗',accessoires:'👜'};
+  function renderProducts(filter){
+    const list=filter==='tous'?getProducts():getProducts().filter(p=>p.cat===filter);
+    const grid=document.getElementById('productsGrid');
+    if(!list.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--mid);padding:3rem">Aucun produit pour l\'instant.</div>';return;}
+    grid.innerHTML=list.map(p=>{
+      const msg=`Bonjour ! Je suis intéressé(e) par : *${p.name}* (${p.price}) 🛍️`;
+      return `<div class="product-card">
+        <div class="product-img">
+          ${p.badge?`<span class="product-badge">${p.badge}</span>`:''}
+          ${p.img?`<img src="${p.img}" alt="${p.name}"/>`:(EMOJI[p.cat]||'📦')}
+        </div>
+        <div class="product-info">
+          <div class="product-cat">${p.cat==='habits'?'Vêtement':'Accessoire'}</div>
+          <div class="product-name">${p.name}</div>
+          <div class="product-desc">${p.desc||''}</div>
+          <div class="product-footer">
+            <div class="product-price">${p.price}</div>
+            <a href="${waLink(msg)}" target="_blank" class="product-btn">💬 Commander</a>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  function filterProducts(btn,cat){
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderProducts(cat);
+  }
+
+  /* ── LOGIN ── */
+  function openLogin(){
+    document.getElementById('loginOverlay').classList.add('show');
+    document.getElementById('loginError').style.display='none';
+    document.getElementById('pwInput').value='';
+    setTimeout(()=>document.getElementById('pwInput').focus(),100);
+  }
+  function closeLogin(){document.getElementById('loginOverlay').classList.remove('show');}
+  function doLogin(){
+    const pw=document.getElementById('pwInput').value;
+    const stored=localStorage.getItem('jf_pw')||DEFAULT_PW;
+    if(pw===stored){
+      closeLogin();
+      openAdmin();
+    } else {
+      document.getElementById('loginError').style.display='block';
+      document.getElementById('pwInput').value='';
+    }
+  }
+  function doLogout(){closeAdmin();showToast('👋 Déconnecté');}
+
+  /* ── ADMIN PANEL ── */
+  function openAdmin(){
+    document.getElementById('adminPanel').classList.add('show');
+    document.body.classList.add('admin-open');
+    loadAdmSettings();
+    admPanel('dashboard');
+  }
+  function closeAdmin(){
+    document.getElementById('adminPanel').classList.remove('show');
+    document.body.classList.remove('admin-open');
+    applySettings();
+    renderProducts('tous');
+    document.querySelectorAll('.filter-btn').forEach((b,i)=>{b.classList.toggle('active',i===0);});
+  }
+
+  const admTitles={dashboard:'Tableau de <em>Bord</em>',products:'Mes <em>Produits</em>',add:'Ajouter un <em>Produit</em>',settings:'Paramètres du <em>Site</em>'};
+  function admPanel(id){
+    document.querySelectorAll('.adm-panel').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.adm-nav-item').forEach(n=>n.classList.remove('active'));
+    document.getElementById('adm-'+id).classList.add('active');
+    document.getElementById('admTitle').innerHTML=admTitles[id];
+    const idx={dashboard:0,products:1,add:2,settings:3}[id];
+    document.querySelectorAll('.adm-nav-item')[idx].classList.add('active');
+    if(id==='products') renderAdmProducts();
+    if(id==='dashboard') updateStats();
+    if(id==='add' && !document.getElementById('editId').value) resetForm();
+  }
+
+  /* Stats */
+  function updateStats(){
+    const p=getProducts();
+    document.getElementById('stTotal').textContent=p.length;
+    document.getElementById('stHabits').textContent=p.filter(x=>x.cat==='habits').length;
+    document.getElementById('stAcc').textContent=p.filter(x=>x.cat==='accessoires').length;
+  }
+
+  /* Render admin products */
+  function renderAdmProducts(){
+    const p=getProducts();
+    const el=document.getElementById('admProductsList');
+    if(!p.length){el.innerHTML='<div style="padding:2rem;text-align:center;color:var(--mid)">Aucun produit. <span style="color:var(--rose);cursor:pointer" onclick="admPanel(\'add\')">Ajouter →</span></div>';return;}
+    el.innerHTML=p.map(x=>`
+      <div class="adm-row">
+        <div class="adm-row-thumb">${x.img?`<img src="${x.img}" alt="${x.name}"/>`:(EMOJI[x.cat]||'📦')}</div>
+        <div><div class="adm-row-name">${x.name}</div><div class="adm-row-cat">${x.cat==='habits'?'Vêtement':'Accessoire'}</div></div>
+        <div class="adm-row-price">${x.price}</div>
+        <div>${x.badge?`<span class="adm-badge">${x.badge}</span>`:''}</div>
+        <div class="adm-row-actions">
+          <button class="btn-edit" onclick="editProduct(${x.id})">✏️ Éditer</button>
+          <button class="btn-del" onclick="delProduct(${x.id})">🗑️</button>
+        </div>
+      </div>`).join('');
+  }
+
+  /* Image preview */
+  function previewImg(e){
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=ev=>{const i=document.getElementById('imgPrev');i.src=ev.target.result;i.style.display='block';};
+    r.readAsDataURL(f);
+  }
+
+  /* Save product */
+  function saveProduct(){
+    const name=document.getElementById('fName').value.trim();
+    const price=document.getElementById('fPrice').value.trim();
+    if(!name||!price){showToast('❌ Nom et prix obligatoires','error');return;}
+    const p={
+      name, price,
+      cat:  document.getElementById('fCat').value,
+      desc: document.getElementById('fDesc').value.trim(),
+      badge:document.getElementById('fBadge').value,
+      img:  (()=>{const i=document.getElementById('imgPrev');return i.style.display!=='none'?i.src:'';})(),
+    };
+    const eid=document.getElementById('editId').value;
+    const arr=getProducts();
+    if(eid){
+      const idx=arr.findIndex(x=>x.id==eid);
+      if(idx>-1){arr[idx]={...arr[idx],...p,img:p.img||arr[idx].img};}
+      saveProducts(arr); showToast('✅ Produit modifié !','success');
+    } else {
+      p.id=arr.length?Math.max(...arr.map(x=>x.id))+1:1;
+      arr.push(p); saveProducts(arr); showToast('✅ Produit ajouté !','success');
+    }
+    resetForm(); renderAdmProducts(); updateStats();
+    setTimeout(()=>admPanel('products'),700);
+  }
+
+  function editProduct(id){
+    const p=getProducts().find(x=>x.id===id); if(!p) return;
+    document.getElementById('editId').value=id;
+    document.getElementById('fName').value=p.name;
+    document.getElementById('fPrice').value=p.price;
+    document.getElementById('fCat').value=p.cat;
+    document.getElementById('fDesc').value=p.desc||'';
+    document.getElementById('fBadge').value=p.badge||'';
+    const img=document.getElementById('imgPrev');
+    if(p.img){img.src=p.img;img.style.display='block';}else{img.style.display='none';}
+    document.getElementById('admFormTitle').textContent='Modifier le produit';
+    admPanel('add');
+  }
+
+  function delProduct(id){
+    if(!confirm('Supprimer ce produit ?')) return;
+    saveProducts(getProducts().filter(x=>x.id!==id));
+    renderAdmProducts(); updateStats();
+    showToast('🗑️ Produit supprimé','success');
+  }
+
+  function cancelEdit(){resetForm();admPanel('products');}
+  function resetForm(){
+    ['editId','fName','fPrice','fDesc'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('fCat').value='habits';
+    document.getElementById('fBadge').value='';
+    document.getElementById('fImg').value='';
+    const i=document.getElementById('imgPrev');i.src='';i.style.display='none';
+    document.getElementById('admFormTitle').textContent='Ajouter un produit';
+  }
+
+  /* Settings */
+  function loadAdmSettings(){
+    const s=getSettings();
+    document.getElementById('sWA').value   =s.whatsapp||'';
+    document.getElementById('sEmail').value=s.email||'';
+    document.getElementById('sAddr').value =s.address||'';
+    document.getElementById('sPhone').value=s.phone||'';
+  }
+  function saveSettings(){
+    localStorage.setItem('jf_settings',JSON.stringify({
+      whatsapp:document.getElementById('sWA').value.trim(),
+      email:   document.getElementById('sEmail').value.trim(),
+      address: document.getElementById('sAddr').value.trim(),
+      phone:   document.getElementById('sPhone').value.trim(),
+    }));
+    showToast('✅ Paramètres sauvegardés !','success');
+  }
+  function changePw(){
+    const pw=document.getElementById('sPw').value.trim();
+    if(!pw||pw.length<6){showToast('❌ Mot de passe trop court (6 min)','error');return;}
+    localStorage.setItem('jf_pw',pw);
+    document.getElementById('sPw').value='';
+    showToast('🔒 Mot de passe changé !','success');
+  }
+
+  /* Toast */
+  function showToast(msg,type=''){
+    const t=document.getElementById('toast');
+    t.textContent=msg; t.className='toast '+type+' show';
+    setTimeout(()=>t.classList.remove('show'),2800);
+  }
+
+  /* ── SCROLL REVEAL ── */
+  const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('visible');});},{threshold:.1});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+  /* ── INIT ── */
+  applySettings();
+  renderProducts('tous');
+  </script>
+</body>
+</html>
